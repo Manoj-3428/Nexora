@@ -28,7 +28,8 @@ import com.nexora.app.domain.model.SharingPool
 @Composable
 fun DiscoveryScreen(
     viewModel: DiscoveryViewModel = hiltViewModel(),
-    onCreatePoolClick: () -> Unit
+    onCreatePoolClick: () -> Unit,
+    onNavigateToPoolDetail: (String) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -58,8 +59,13 @@ fun DiscoveryScreen(
         permissionsLauncher.launch(permissionsToRequest.toTypedArray())
 
         viewModel.effect.collect { effect ->
-            if (effect is DiscoveryEffect.ShowToast) {
-                Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+            when (effect) {
+                is DiscoveryEffect.ShowToast -> {
+                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
+                is DiscoveryEffect.NavigateToPoolDetail -> {
+                    onNavigateToPoolDetail(effect.poolId) 
+                }
             }
         }
     }
@@ -96,6 +102,10 @@ fun DiscoveryScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            if (state.isLoading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
             if (state.isScanning) {
                 RadarAnimation()
             }

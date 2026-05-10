@@ -6,6 +6,7 @@ enum class Visibility {
 }
 
 data class PoolConfig(
+    val poolId: String,
     val name: String,
     val visibility: Visibility,
     val password: String? = null,

@@ -2,6 +2,7 @@ package com.nexora.app.di
 
 import com.nexora.app.core.network.AuthInterceptor
 import com.nexora.app.data.remote.AuthApi
+import com.nexora.app.data.remote.PoolApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,5 +50,11 @@ object NetworkModule {
     @Singleton
     fun provideAuthApi(retrofit: Retrofit): AuthApi {
         return retrofit.create(AuthApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePoolApi(retrofit: Retrofit): PoolApi {
+        return retrofit.create(PoolApi::class.java)
     }
 }

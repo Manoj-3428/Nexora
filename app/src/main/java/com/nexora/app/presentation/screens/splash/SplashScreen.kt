@@ -31,7 +31,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(
-    onNavigateToOnboarding: () -> Unit,
+    onNavigateToOnboarding: (Boolean) -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     viewModel: SplashViewModel = hiltViewModel()
@@ -81,13 +81,13 @@ fun SplashScreen(
         startAnimation = true
         delay(2000)
         
-        if (token != null) {
-            onNavigateToDashboard()
+        if (!hasRequiredPermissions()) {
+            onNavigateToOnboarding(token != null)
         } else {
-            if (hasRequiredPermissions()) {
-                onNavigateToLogin()
+            if (token != null) {
+                onNavigateToDashboard()
             } else {
-                onNavigateToOnboarding()
+                onNavigateToLogin()
             }
         }
     }

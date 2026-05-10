@@ -1,7 +1,10 @@
 package com.nexora.app.presentation.screens.create_pool
 
 import android.Manifest
+import android.net.Uri
 import android.os.Build
+import android.provider.OpenableColumns
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nexora.app.core.designsystem.theme.Dimens
 import com.nexora.app.domain.model.Visibility
+import com.nexora.app.domain.model.SelectedFile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +34,17 @@ fun CreatePoolScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+
+    // Launcher for selecting multiple files
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenMultipleDocuments(),
+        onResult = { uris ->
+            val selectedFiles = uris.mapNotNull { uri ->
+                getFileMetadata(context, uri)
+            }
+            viewModel.handleEvent(CreatePoolEvent.OnItemsSelected(selectedFiles))
+        }
+    )
 
     // Launchers for Runtime Permissions required by Nearby Connections API
     val permissionsLauncher = rememberLauncherForActivityResult(
@@ -126,15 +141,15 @@ fun CreatePoolScreen(
                 )
             }
 
-            // Dummy Item Selection
+            // Item Selection
             Button(
                 onClick = {
-                    viewModel.handleEvent(CreatePoolEvent.OnItemsSelected(state.selectedItemCount + 1))
+                    filePickerLauncher.launch(arrayOf("*/*"))
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                Text("Select Files/Media (${state.selectedItemCount} selected)", color = MaterialTheme.colorScheme.onSurface)
+                Text("Select Files/Media (${state.selectedFiles.size} selected)", color = MaterialTheme.colorScheme.onSurface)
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -172,5 +187,34 @@ fun CreatePoolScreen(
                 }
             }
         }
+    }
+}
+
+private fun getFileMetadata(context: android.content.Context, uri: Uri): SelectedFile? {
+    val contentResolver = context.contentResolver
+    val cursor = contentResolver.query(uri, null, null, null, null)
+    return cursor?.use {
+        if (it.moveToFirst()) {
+            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
+            val name = if (nameIndex != -1) it.getString(nameIndex) else "Unknown"
+            val size = if (sizeIndex != -1) it.getLong(sizeIndex) else 0L
+            val mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
+            
+            val type = when {
+                mimeType.startsWith("video/") -> "VIDEO"
+                mimeType.startsWith("audio/") -> "AUDIO"
+                mimeType.startsWith("image/") -> "IMAGE"
+                else -> "DOCUMENT"
+            }
+
+            SelectedFile(
+                name = name,
+                type = type,
+                mimeType = mimeType,
+                size = size,
+                uri = uri.toString()
+            )
+        } else null
     }
 }

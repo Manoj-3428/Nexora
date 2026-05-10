@@ -1,8 +1,15 @@
 package com.nexora.app.di
 
-import com.nexora.app.domain.repository.DiscoveryRepository
-import com.nexora.app.data.repository.DiscoveryRepositoryImpl
 import android.content.Context
+import com.nexora.app.data.remote.AuthApi
+import com.nexora.app.data.remote.PoolApi
+import com.nexora.app.data.repository.AuthRepositoryImpl
+import com.nexora.app.data.repository.DiscoveryRepositoryImpl
+import com.nexora.app.data.repository.PoolRepositoryImpl
+import com.nexora.app.domain.repository.AuthRepository
+import com.nexora.app.domain.repository.DiscoveryRepository
+import com.nexora.app.domain.repository.PoolRepository
+import com.nexora.app.core.network.TokenManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,9 +30,17 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideAuthRepository(
-        authApi: com.nexora.app.data.remote.AuthApi,
-        tokenManager: com.nexora.app.core.network.TokenManager
-    ): com.nexora.app.domain.repository.AuthRepository {
-        return com.nexora.app.data.repository.AuthRepositoryImpl(authApi, tokenManager)
+        authApi: AuthApi,
+        tokenManager: TokenManager
+    ): AuthRepository {
+        return AuthRepositoryImpl(authApi, tokenManager)
+    }
+
+    @Provides
+    @Singleton
+    fun providePoolRepository(
+        poolApi: PoolApi
+    ): PoolRepository {
+        return PoolRepositoryImpl(poolApi)
     }
 }

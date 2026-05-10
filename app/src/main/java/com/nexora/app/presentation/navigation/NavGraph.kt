@@ -11,6 +11,8 @@ import com.nexora.app.presentation.screens.onboarding.OnboardingScreen
 import com.nexora.app.presentation.screens.splash.SplashScreen
 import com.nexora.app.presentation.screens.auth.LoginScreen
 import com.nexora.app.presentation.screens.auth.SignupScreen
+import com.nexora.app.presentation.screens.pool_detail.PoolDetailScreen
+import com.nexora.app.presentation.screens.active_pool.ActivePoolScreen
 
 @Composable
 fun NavGraph(
@@ -23,8 +25,8 @@ fun NavGraph(
     ) {
         composable(route = Screen.Splash.route) {
             SplashScreen(
-                onNavigateToOnboarding = {
-                    navController.navigate(Screen.Onboarding.route) {
+                onNavigateToOnboarding = { hasToken ->
+                    navController.navigate(Screen.Onboarding.createRoute(hasToken)) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 },
@@ -41,11 +43,26 @@ fun NavGraph(
             )
         }
         
-        composable(route = Screen.Onboarding.route) {
+        composable(
+            route = Screen.Onboarding.route,
+            arguments = listOf(
+                androidx.navigation.navArgument("hasToken") {
+                    type = androidx.navigation.NavType.BoolType
+                    defaultValue = false
+                }
+            )
+        ) { backStackEntry ->
+            val hasToken = backStackEntry.arguments?.getBoolean("hasToken") ?: false
             OnboardingScreen(
                 onFinishOnboarding = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    if (hasToken) {
+                        navController.navigate(Screen.Discovery.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        }
                     }
                 }
             )
@@ -77,6 +94,9 @@ fun NavGraph(
             DiscoveryScreen(
                 onCreatePoolClick = {
                     navController.navigate(Screen.CreatePool.route)
+                },
+                onNavigateToPoolDetail = { poolId ->
+                    navController.navigate(Screen.PoolDetail.createRoute(poolId))
                 }
             )
         }
@@ -85,8 +105,29 @@ fun NavGraph(
             CreatePoolScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToActivePool = {
-                    navController.popBackStack()
+                    navController.navigate(Screen.ActivePool.route) {
+                        popUpTo(Screen.CreatePool.route) { inclusive = true }
+                    }
                 }
+            )
+        }
+
+        composable(route = Screen.ActivePool.route) {
+            ActivePoolScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.PoolDetail.route,
+            arguments = listOf(
+                androidx.navigation.navArgument("poolId") {
+                    type = androidx.navigation.NavType.StringType
+                }
+            )
+        ) {
+            PoolDetailScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

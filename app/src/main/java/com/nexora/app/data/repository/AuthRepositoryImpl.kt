@@ -50,7 +50,8 @@ class AuthRepositoryImpl @Inject constructor(
 
     private fun handleException(e: Exception): NetworkResult<Unit> {
         return when (e) {
-            is SocketTimeoutException -> NetworkResult.Error("Connection timed out. Please try again.")
+            is java.net.UnknownHostException -> NetworkResult.Error("Unable to connect to server. Please check your internet connection or DNS settings.")
+            is java.net.SocketTimeoutException -> NetworkResult.Error("Connection timed out. Please try again.")
             else -> NetworkResult.Error(e.localizedMessage ?: "An unexpected error occurred.")
         }
     }
