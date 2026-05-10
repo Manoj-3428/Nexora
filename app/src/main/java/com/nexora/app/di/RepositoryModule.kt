@@ -19,4 +19,13 @@ object RepositoryModule {
     fun provideDiscoveryRepository(@ApplicationContext context: Context): DiscoveryRepository {
         return DiscoveryRepositoryImpl(context)
     }
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        authApi: com.nexora.app.data.remote.AuthApi,
+        tokenManager: com.nexora.app.core.network.TokenManager
+    ): com.nexora.app.domain.repository.AuthRepository {
+        return com.nexora.app.data.repository.AuthRepositoryImpl(authApi, tokenManager)
+    }
 }

@@ -9,6 +9,8 @@ import com.nexora.app.presentation.screens.create_pool.CreatePoolScreen
 import com.nexora.app.presentation.screens.discovery.DiscoveryScreen
 import com.nexora.app.presentation.screens.onboarding.OnboardingScreen
 import com.nexora.app.presentation.screens.splash.SplashScreen
+import com.nexora.app.presentation.screens.auth.LoginScreen
+import com.nexora.app.presentation.screens.auth.SignupScreen
 
 @Composable
 fun NavGraph(
@@ -26,9 +28,14 @@ fun NavGraph(
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
                 onNavigateToDashboard = {
                     navController.navigate(Screen.Discovery.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -37,8 +44,30 @@ fun NavGraph(
         composable(route = Screen.Onboarding.route) {
             OnboardingScreen(
                 onFinishOnboarding = {
-                    navController.navigate(Screen.Discovery.route) {
+                    navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        composable(route = Screen.Login.route) {
+            LoginScreen(
+                onNavigateToSignup = { navController.navigate(Screen.Signup.route) },
+                onLoginSuccess = {
+                    navController.navigate(Screen.Discovery.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(route = Screen.Signup.route) {
+            SignupScreen(
+                onNavigateToLogin = { navController.popBackStack() },
+                onSignupSuccess = {
+                    navController.navigate(Screen.Discovery.route) {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )

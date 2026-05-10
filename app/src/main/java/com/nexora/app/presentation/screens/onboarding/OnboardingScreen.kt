@@ -1,5 +1,9 @@
 package com.nexora.app.presentation.screens.onboarding
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,13 +19,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.nexora.app.core.designsystem.theme.Dimens
 
 @Composable
 fun OnboardingScreen(
     onFinishOnboarding: () -> Unit
 ) {
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            // Whether all are granted or not, we proceed for now. 
+            // In a strict production app, you might block them until granted.
+            onFinishOnboarding()
+        }
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -39,7 +51,7 @@ fun OnboardingScreen(
         Spacer(modifier = Modifier.height(Dimens.SpaceMedium))
         
         Text(
-            text = "A futuristic nearby offline digital sharing ecosystem.",
+            text = "A futuristic nearby offline digital sharing ecosystem. We need a few permissions to find nearby devices.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
@@ -48,12 +60,29 @@ fun OnboardingScreen(
         Spacer(modifier = Modifier.height(Dimens.SpaceExtraLarge))
         
         Button(
-            onClick = onFinishOnboarding,
+            onClick = {
+                val permissionsToRequest = mutableListOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+                
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    permissionsToRequest.add(Manifest.permission.BLUETOOTH_SCAN)
+                    permissionsToRequest.add(Manifest.permission.BLUETOOTH_ADVERTISE)
+                    permissionsToRequest.add(Manifest.permission.BLUETOOTH_CONNECT)
+                }
+                
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    permissionsToRequest.add(Manifest.permission.NEARBY_WIFI_DEVICES)
+                }
+                
+                permissionLauncher.launch(permissionsToRequest.toTypedArray())
+            },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.tertiary
             )
         ) {
-            Text("Get Started")
+            Text("Grant Permissions & Get Started")
         }
     }
 }

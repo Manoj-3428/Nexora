@@ -12,32 +12,32 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = PrimaryDarkBlue,
-    onPrimary = TextPrimary,
-    secondary = SecondaryDeepBlue,
-    onSecondary = TextPrimary,
+    primary = PrimaryBlue,
+    onPrimary = BackgroundWhite,
+    secondary = SecondaryBlue,
+    onSecondary = BackgroundWhite,
     tertiary = AccentBlue,
-    background = BackgroundDark,
-    onBackground = TextPrimary,
-    surface = SurfaceDark,
-    onSurface = TextPrimary,
+    background = TextPrimaryDark,
+    onBackground = BackgroundWhite,
+    surface = TextPrimaryDark,
+    onSurface = BackgroundWhite,
     surfaceVariant = TransparentSurface,
     error = ErrorRed,
-    onError = TextPrimary
+    onError = BackgroundWhite
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = PrimaryLightBlue,
-    onPrimary = TextPrimary,
-    secondary = AccentBlue,
-    onSecondary = TextPrimary,
-    tertiary = PrimaryDarkBlue,
-    background = SoftWhite,
-    onBackground = PrimaryDarkBlue,
-    surface = BluishWhite,
-    onSurface = PrimaryDarkBlue,
+    primary = PrimaryBlue,
+    onPrimary = BackgroundWhite,
+    secondary = SecondaryBlue,
+    onSecondary = BackgroundWhite,
+    tertiary = AccentBlue,
+    background = BackgroundWhite,
+    onBackground = TextPrimaryDark,
+    surface = SurfaceWhite,
+    onSurface = TextPrimaryDark,
     error = ErrorRed,
-    onError = TextPrimary
+    onError = BackgroundWhite
 )
 
 @Composable
@@ -45,8 +45,8 @@ fun NexoraTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    // Forcing Dark Theme for the futuristic feel as default, but retaining flexibility
-    val colorScheme = if (darkTheme) DarkColorScheme else DarkColorScheme // Enforcing dark theme heavily for now as per requirement
+    // We use the Light Theme by default to ensure the White and Blue modern design is prominent
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme 
     
     val view = LocalView.current
     if (!view.isInEditMode) {
